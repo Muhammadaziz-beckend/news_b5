@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}
+| {{ news.name }}
+{% endblock title %}
+
+{% block content %}
+    <h1 class="text-center mb-4">{{ news.name }}</h1>
+    <p class="text-center">
+        <img src="{{ news.image.url }}" class="w-75" alt="">
+    </p>
+    <p>{{ news.description }}</p>
+    <p>{{ news.content }}</p>
+    <p  class="d-flex justify-content-between">
+        <span>{{ news.date }}</span>
+        <span>{{ news.category.name }}</span>
+    </p>
+    <p>
+        {% for tag in news.tags.all %}
+                <a href="#">{{ tag.name }}</a> /
+        {% endfor %}
+        </p>
+    <p>
+        {{ news.views }} - 
+        {% if news.author is None %} 
+            No author
+        {% else %}
+            {{ news.author }}
+        {% endif %}
+    </p>
+    <p class="text-end">
+        {% if news.link %}
+            <a href="{{ news.link.site_link }}">Web Site</a>
+            <a href="{{ news.link.instagram_link }}">Instgram</a>
+            <a href="{{ news.link.x_link }}">X app</a>
+            <a href="{{ news.link.facebook_link }}">Facebook</a>
+            <a href="{{ news.link.telegram_link }}">Telegram</a>
+        {% endif %}
+    </p>
+{% endblock content %}

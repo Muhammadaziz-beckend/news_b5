@@ -12,18 +12,6 @@
 
         {{ form.as_p }}
 
-        {% comment %} {% for input in form %}
-
-        <div class="mb-4">
-            <label for="news_name">{{ input.label }}</label>
-            {{ input }}
-            {% for error in input.errors %}
-                <div class="text-danger mb-3">{{ error }}</div>
-            {% endfor %}
-        </div>
-
-        {% endfor %} {% endcomment %}
-
         <div>
             <button type="submit" class="btn btn-success w-100">Create</button>
         </div>

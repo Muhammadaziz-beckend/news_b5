@@ -21,13 +21,18 @@
             <form action="{% url 'login' %}" id="login_form" method="POST" novalidate>
                 {% csrf_token %}
                 <div class="mb-4">
-                    
+                    <label for="{{form.username.id}}">
+                        <h4>Name:</h4>
+                    </label>
                     {{ form.username }}
                     <div class="text-danger">
                         {{ form.username.errors }}
                     </div>
                 </div>
                 <div class="mb-4">
+                    <label for="{{form.password.id}}">
+                        <h4>Password:</h4>
+                    </label>
                     {{ form.password }}
                      <div class="text-danger">
                         {{ form.password.errors }}

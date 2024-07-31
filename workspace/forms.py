@@ -1,5 +1,6 @@
 
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 
 from news.models import Category, News, Tag
 
@@ -64,3 +65,16 @@ class NewsModelForm(forms.ModelForm):
                 'placeholder': 'Автор',
             })
         }
+
+    
+class LoginForm(forms.Form):
+
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={"autofocus": True, 'class': 'form-control'}), 
+        label='Имя пользователя'
+    )
+    password = forms.CharField(
+        label='Пароль',
+        strip=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "current-password", 'class': 'form-control'}),
+    )

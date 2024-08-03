@@ -15,12 +15,7 @@
                     <span>{{ item.category.name }}</span>
                 </p>
                 <p>
-                    {{ item.views }} - 
-                    {% if item.author is None %} 
-                        No author
-                    {% else %}
-                        {{ item.author }}
-                    {% endif %}
+                    {{ item.views }} - {{ item.author.first_name }} {{ item.author.last_name }}
                 </p>
                 <p>
                    {% for tag in item.tags.all %}

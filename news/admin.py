@@ -23,9 +23,10 @@ class NewsAdmin(admin.ModelAdmin):
         'content', 
         'tags__name', 
         'category__name',
-        'author'
+        'author__first_name',
+        'author__last_name',
     )
-    list_filter = ('tags', 'category', 'is_published', 'date')
+    list_filter = ('tags', 'category', 'is_published', 'date', 'author')
 
     readonly_fields = (
         'views',

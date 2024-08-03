@@ -2,13 +2,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator
 from pprint import pprint
 from news.models import Category, News, Tag
+from workspace.decorators import is_owner
 from workspace.forms import LoginForm, NewsForm, NewsModelForm, RegisterForm
 from pprint import pprint
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 
 
+@login_required(login_url='/workspace/login/')
 def workspace(request):
-    news = News.objects.all().order_by('-date', 'name')
+    news = News.objects.filter(author=request.user).order_by('-date', 'name')
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 4))
  
@@ -18,18 +21,23 @@ def workspace(request):
     return render(request, 'workspace/index.html', {'news': news})
 
 
+@login_required(login_url='/workspace/login/')
 def create_news(request):
     form = NewsModelForm()
 
     if request.method == 'POST':
         form = NewsModelForm(data=request.POST, files=request.FILES)
         if form.is_valid():
-            news = form.save()
+            news = form.save(commit=False)
+            news.author = request.user
+            news.save()
             return redirect('/workspace/')
          
     return render(request, 'workspace/create_news.html', {'form': form})
 
 
+@login_required(login_url='/workspace/login/')
+@is_owner
 def delete_news(request, id):
     news = get_object_or_404(News, id=id)
     news.delete()
@@ -81,6 +89,8 @@ def delete_news(request, id):
 #     })
 
 
+@login_required(login_url='/workspace/login/')
+@is_owner
 def update_news(request, id):
     news = get_object_or_404(News, id=id)
     form = NewsModelForm(instance=news)
@@ -122,11 +132,12 @@ def login_profile(request):
     return render(request, 'auth/login.html', {'form': form})
 
 
+
 def logout_profile(request):
     if request.user.is_authenticated:
         logout(request)
     
-    return redirect('/workspace/')
+    return redirect('/')
 
 
 def register(request):

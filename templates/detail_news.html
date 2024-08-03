@@ -21,12 +21,7 @@
         {% endfor %}
         </p>
     <p>
-        {{ news.views }} - 
-        {% if news.author is None %} 
-            No author
-        {% else %}
-            {{ news.author }}
-        {% endif %}
+        {{ news.views }} - {{ news.author.first_name }} {{ news.author.last_name }}
     </p>
     <p class="text-end">
         {% if news.link %}

@@ -17,7 +17,7 @@ class News(models.Model):
     content = models.TextField(verbose_name='контент')
     date = models.DateTimeField(verbose_name='дата добавление', auto_now_add=True)
     views = models.PositiveIntegerField(verbose_name='просмотры', default=0)
-    author = models.CharField(verbose_name='автор', max_length=100, blank=True, null=True)
+    author = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='news', verbose_name='автор')
     is_published = models.BooleanField(verbose_name='публичность', default=True)
 
     def __str__(self):

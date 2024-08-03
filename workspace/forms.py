@@ -48,7 +48,6 @@ class NewsModelForm(forms.ModelForm):
             'category',
             'tags',
             'image',
-            'author',
             'is_published',
         )
 
@@ -64,10 +63,6 @@ class NewsModelForm(forms.ModelForm):
             'category': forms.Select(attrs={'class': 'form-select'}),
             'tags': forms.CheckboxSelectMultiple(),
             'content': forms.Textarea(attrs={'class': 'form-control', 'cols': '5'}),
-            'author': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Автор',
-            })
         }
 
     
@@ -137,11 +132,23 @@ class RegisterForm(forms.ModelForm):
        
         cleaned_data = super().clean()
         
-        password1 = cleaned_data.pop('password1')
-        password2 = cleaned_data.pop('password2')
+        password1 = cleaned_data.pop('password1', None)
+        password2 = cleaned_data.pop('password2', None)
 
-        if password1 != password2:
+        # errors = {}
+
+        # if password1 is None:
+        #     errors['password1'] = ['Обязательное поле.']
+
+        # if password2 is None:
+        #     errors['password2'] = ['Обязательное поле.']
+
+        # if len(errors) > 0:
+        #     raise forms.ValidationError(errors)
+
+        if (password1 is not None and password2 is not None) and password1 != password2:
             raise forms.ValidationError({'password2': ['The passwords dont\'t match.']})
+
         
         password = make_password(password1)
         cleaned_data.setdefault('password', password)

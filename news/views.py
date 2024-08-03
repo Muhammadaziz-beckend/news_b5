@@ -35,6 +35,17 @@ def detail_news(request, id):
 
     news = get_object_or_404(News, id=id)
 
+    if request.user.is_authenticated:
+        user = request.user
+        if user != news.author:
+            news.views += 1
+    
+    else:
+        news.views += 1
+
+    news.save()
+
+
     return render(request, 'detail_news.html', {'news': news})
 
 

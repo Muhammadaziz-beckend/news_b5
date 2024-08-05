@@ -7,6 +7,7 @@ from workspace.forms import LoginForm, NewsForm, NewsModelForm, RegisterForm
 from pprint import pprint
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 @login_required(login_url='/workspace/login/')
@@ -31,6 +32,7 @@ def create_news(request):
             news = form.save(commit=False)
             news.author = request.user
             news.save()
+            messages.success(request, f'The news "{news.name}" has been successfully added!')
             return redirect('/workspace/')
          
     return render(request, 'workspace/create_news.html', {'form': form})
@@ -41,6 +43,7 @@ def create_news(request):
 def delete_news(request, id):
     news = get_object_or_404(News, id=id)
     news.delete()
+    messages.success(request, f'The news "{news.name}" has been successfully deleted!')
     return redirect('/workspace/')
 
 
@@ -100,6 +103,7 @@ def update_news(request, id):
 
         if form.is_valid():
             form.save()
+            messages.success(request, f'The news "{news.name}" has been successfully updated!')
             return redirect('/workspace/')
 
     return render(request, 'workspace/update_news.html', {
@@ -122,6 +126,7 @@ def login_profile(request):
             user = authenticate(username=username, password=password)
             if user:
                 login(request, user)   
+                messages.success(request, f'Welcome "{user.get_full_name()}"')
                 return redirect('/workspace/') 
             
 
@@ -137,6 +142,8 @@ def logout_profile(request):
     if request.user.is_authenticated:
         logout(request)
     
+    messages.success(request, f'Good bye!')
+    
     return redirect('/')
 
 
@@ -147,17 +154,21 @@ def register(request):
     form = RegisterForm()
 
     
+
+    
     if request.method == 'POST':
         form = RegisterForm(data=request.POST)
         
         if form.is_valid():
             user = form.save()
             login(request, user)
+            messages.success(request, f'Welcome "{user.get_full_name()}"')
             return redirect('/workspace/')
-    
+        
+        messages.error(request, f'Fix some errors below!')
+
 
     return render(request, 'auth/register.html', {'form': form})
     
-
 
 # Create your views here.

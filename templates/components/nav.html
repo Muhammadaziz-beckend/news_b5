@@ -21,7 +21,7 @@
                             {{ request.user.username }}
                         </a>
                         <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'workspace' %}">Workspace</a></li>
+                        <li><a class="dropdown-item" href="{% url 'workspace' %}?is_published=on">Workspace</a></li>
                         <li><a class="dropdown-item" href="#">Profile</a></li>
                         <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
                         </ul>

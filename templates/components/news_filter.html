@@ -1,9 +1,10 @@
-<form action="{% url 'main' %}">
+<form action="">
     {{ filterset.form.as_p }}
+    
 
     <div>
-        <button type="submit" class="btn btn-primary w-100 d-block">Filter</button>
-        <button type="reset" class="btn btn-primary w-100 d-block">Clear</button>
+        <button type="submit" class="btn btn-primary w-100 d-block btn-lg">Filter</button>
+        <button type="reset" class="btn btn-primary w-100 btn-lg d-block" style="margin-top: 10px;">Clear</button>
     </div>
 
 </form>

@@ -24,13 +24,15 @@ def main(request):
 
     news = filterset.qs
 
+
+
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 4))
  
     pagin = Paginator(news, page_size)
     news = pagin.get_page(page) 
 
-    return render(request, 'index.html', {'news': news, 'filterset': filterset})
+    return render(request, 'index.html', {'news': news, 'filterset': filterset,})
 
 
 def detail_news(request, id):

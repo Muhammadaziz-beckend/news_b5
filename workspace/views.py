@@ -8,43 +8,82 @@ from pprint import pprint
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from workspace.filters import WorkspaceFilter as NewsFilter
 
 
-@login_required(login_url='/workspace/login/')
+@login_required(login_url="/workspace/login/")
 def workspace(request):
-    news = News.objects.filter(author=request.user).order_by('-date', 'name')
-    page = int(request.GET.get('page', 1))
-    page_size = int(request.GET.get('page_size', 4))
- 
+    news = News.objects.filter(author=request.user).order_by("-date", "name")
+
+    filterset = NewsFilter(data=request.GET, queryset=news)
+
+    news = filterset.qs
+
+    category_id = request.GET.get("category", 0)
+    tags_id = request.GET.get("tags", 'tags=')
+    date_id = request.GET.get("date", 'date=')
+    is_published_id = request.GET.get("is_published", 'is_published=')
+
+    arr = [
+        ("category", category_id),
+        ("tags", tags_id),
+        ("date", date_id),
+        ("is_published", is_published_id),
+    ]
+
+    obj = {}
+
+    for i in arr:
+        if i[1]:
+            obj[i[0]] = i[1]
+
+    text = ""
+    for i in obj:
+        if not text:
+            text += f"?{i}={obj[i]}"
+        else:
+            text += f"&{i}={obj[i]}"
+    if text:
+        text += "&"
+
+    page = int(request.GET.get("page", 1))
+    page_size = int(request.GET.get("page_size", 4))
+
     pagin = Paginator(news, page_size)
-    news = pagin.get_page(page) 
+    news = pagin.get_page(page)
+    print(obj, text, "1111")
+    return render(
+        request,
+        "workspace/index.html",
+        {"news": news, "filterset": filterset, "obj": text},
+    )
 
-    return render(request, 'workspace/index.html', {'news': news})
 
-
-@login_required(login_url='/workspace/login/')
+@login_required(login_url="/workspace/login/")
 def create_news(request):
     form = NewsModelForm()
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = NewsModelForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             news = form.save(commit=False)
             news.author = request.user
             news.save()
-            messages.success(request, f'The news "{news.name}" has been successfully added!')
-            return redirect('/workspace/')
-         
-    return render(request, 'workspace/create_news.html', {'form': form})
+            messages.success(
+                request, f'The news "{news.name}" has been successfully added!'
+            )
+            return redirect("/workspace/")
+
+    return render(request, "workspace/create_news.html", {"form": form})
 
 
-@login_required(login_url='/workspace/login/')
+@login_required(login_url="/workspace/login/")
 @is_owner
 def delete_news(request, id):
     news = get_object_or_404(News, id=id)
     news.delete()
     messages.success(request, f'The news "{news.name}" has been successfully deleted!')
-    return redirect('/workspace/')
+    return redirect("/workspace/")
 
 
 # def update_news(request, id):
@@ -83,7 +122,7 @@ def delete_news(request, id):
 #                 news.image.save(image.name, image)
 
 #             news.save()
-            
+
 #             return redirect('/workspace/')
 
 #     return render(request, 'workspace/update_news.html', {
@@ -92,83 +131,84 @@ def delete_news(request, id):
 #     })
 
 
-@login_required(login_url='/workspace/login/')
+@login_required(login_url="/workspace/login/")
 @is_owner
 def update_news(request, id):
     news = get_object_or_404(News, id=id)
     form = NewsModelForm(instance=news)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = NewsModelForm(data=request.POST, files=request.FILES, instance=news)
 
         if form.is_valid():
             form.save()
-            messages.success(request, f'The news "{news.name}" has been successfully updated!')
-            return redirect('/workspace/')
+            messages.success(
+                request, f'The news "{news.name}" has been successfully updated!'
+            )
+            return redirect("/workspace/")
 
-    return render(request, 'workspace/update_news.html', {
-        'news': news,
-        'form': form,
-    })
+    return render(
+        request,
+        "workspace/update_news.html",
+        {
+            "news": news,
+            "form": form,
+        },
+    )
 
 
 def login_profile(request):
     if request.user.is_authenticated:
-        return redirect('/workspace/')
-    
+        return redirect("/workspace/")
+
     form = LoginForm()
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = LoginForm(data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
             user = authenticate(username=username, password=password)
             if user:
-                login(request, user)   
+                login(request, user)
                 messages.success(request, f'Welcome "{user.get_full_name()}"')
-                return redirect('/workspace/') 
-            
+                return redirect("/workspace/")
 
-            message = 'The user does not exist or the password is incorrect.'
-            return render(request, 'auth/login.html', {'form': form, 'message': message})
+            message = "The user does not exist or the password is incorrect."
+            return render(
+                request, "auth/login.html", {"form": form, "message": message}
+            )
 
-
-    return render(request, 'auth/login.html', {'form': form})
-
+    return render(request, "auth/login.html", {"form": form})
 
 
 def logout_profile(request):
     if request.user.is_authenticated:
         logout(request)
-    
-    messages.success(request, f'Good bye!')
-    
-    return redirect('/')
+
+    messages.success(request, f"Good bye!")
+
+    return redirect("/")
 
 
 def register(request):
     if request.user.is_authenticated:
-        return redirect('/workspace/')
-    
+        return redirect("/workspace/")
+
     form = RegisterForm()
 
-    
-
-    
-    if request.method == 'POST':
+    if request.method == "POST":
         form = RegisterForm(data=request.POST)
-        
+
         if form.is_valid():
             user = form.save()
             login(request, user)
             messages.success(request, f'Welcome "{user.get_full_name()}"')
-            return redirect('/workspace/')
-        
-        messages.error(request, f'Fix some errors below!')
+            return redirect("/workspace/")
 
+        messages.error(request, f"Fix some errors below!")
 
-    return render(request, 'auth/register.html', {'form': form})
-    
+    return render(request, "auth/register.html", {"form": form})
+
 
 # Create your views here.

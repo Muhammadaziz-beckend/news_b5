@@ -3,6 +3,8 @@ from django.shortcuts import render, get_object_or_404
 from news.models import News, Category
 from django.core.paginator import Paginator
 
+from workspace.filters import NewsFilter
+
 
 
 def main(request):
@@ -13,10 +15,14 @@ def main(request):
     if search:
         news = news.filter(name__icontains=search)
 
-    category_id = int(request.GET.get('category', 0))
+    category_id = request.GET.get('category')
 
     if category_id:
-        news = news.filter(category__id=category_id)
+        news = news.filter(category__id=int(category_id))
+
+    filterset = NewsFilter(data=request.GET, queryset=news)
+
+    news = filterset.qs
 
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 4))
@@ -24,7 +30,7 @@ def main(request):
     pagin = Paginator(news, page_size)
     news = pagin.get_page(page) 
 
-    return render(request, 'index.html', {'news': news})
+    return render(request, 'index.html', {'news': news, 'filterset': filterset})
 
 
 def detail_news(request, id):

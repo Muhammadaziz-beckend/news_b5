@@ -3,12 +3,13 @@ from django.core.paginator import Paginator
 from pprint import pprint
 from news.models import Category, News, Tag
 from workspace.decorators import is_owner
-from workspace.forms import LoginForm, NewsForm, NewsModelForm, RegisterForm
+from workspace.forms import ChangeProfileForm, ChangePsswordForm, LoginForm, NewsForm, NewsModelForm, RegisterForm
 from pprint import pprint
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from workspace.filters import WorkspaceFilter as NewsFilter
+
 
 
 @login_required(login_url="/workspace/login/")
@@ -72,7 +73,7 @@ def create_news(request):
             messages.success(
                 request, f'The news "{news.name}" has been successfully added!'
             )
-            return redirect("/workspace/")
+            return redirect("/workspace/?is_published=on")
 
     return render(request, "workspace/create_news.html", {"form": form})
 
@@ -83,7 +84,7 @@ def delete_news(request, id):
     news = get_object_or_404(News, id=id)
     news.delete()
     messages.success(request, f'The news "{news.name}" has been successfully deleted!')
-    return redirect("/workspace/")
+    return redirect("/workspace/?is_published=on")
 
 
 # def update_news(request, id):
@@ -92,7 +93,7 @@ def delete_news(request, id):
 #         initial={
 #             'name': news.name,
 #             'description': news.description,
-#             'content': news.content,
+#             'content': news.content,языковой
 #             'category': news.category,
 #             'tags': news.tags.all(),
 #             'author': news.author,
@@ -145,7 +146,7 @@ def update_news(request, id):
             messages.success(
                 request, f'The news "{news.name}" has been successfully updated!'
             )
-            return redirect("/workspace/")
+            return redirect("/workspace/?is_published=on")
 
     return render(
         request,
@@ -159,7 +160,7 @@ def update_news(request, id):
 
 def login_profile(request):
     if request.user.is_authenticated:
-        return redirect("/workspace/")
+        return redirect("/workspace/?is_published=on")
 
     form = LoginForm()
 
@@ -188,12 +189,12 @@ def logout_profile(request):
 
     messages.success(request, f"Good bye!")
 
-    return redirect("/")
+    return redirect("/?is_published=on+to&dsfsd")
 
 
 def register(request):
     if request.user.is_authenticated:
-        return redirect("/workspace/")
+        return redirect("/workspace/?is_published=on")
 
     form = RegisterForm()
 
@@ -204,11 +205,49 @@ def register(request):
             user = form.save()
             login(request, user)
             messages.success(request, f'Welcome "{user.get_full_name()}"')
-            return redirect("/workspace/")
+            return redirect("/workspace/is_published=on")
 
         messages.error(request, f"Fix some errors below!")
 
     return render(request, "auth/register.html", {"form": form})
 
+
+@login_required(login_url='/workspace/login/')
+def profile(request):
+
+    form = ChangeProfileForm(instance=request.user)
+
+    if request.method == 'POST':
+        form = ChangeProfileForm(instance=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Successfully changed profile')
+            return redirect('/workspace/')
+
+    return render(request, 'auth/profile.html', {'form': form})
+
+
+@login_required(login_url='/workspace/login/')
+def change_password(request):
+
+    form = ChangePsswordForm(user=request.user)
+
+    if request.method == 'POST':
+
+        form = ChangePsswordForm(user=request.user, data=request.POST)
+
+        if form.is_valid():
+            new_password = form.cleaned_data.get('new_password')
+            
+            user = request.user
+            user.set_password(new_password)
+            user.save()
+
+            login(request, user)
+
+            messages.success(request, f'Successfully changed password')
+            return redirect('/workspace/')
+
+    return render(request, 'auth/change_password.html', {'form': form})
 
 # Create your views here.

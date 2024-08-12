@@ -238,7 +238,7 @@ def change_password(request):
 
         if form.is_valid():
             new_password = form.cleaned_data.get('new_password')
-            
+
             user = request.user
             user.set_password(new_password)
             user.save()
@@ -247,7 +247,7 @@ def change_password(request):
 
             messages.success(request, f'Successfully changed password')
             return redirect('/workspace/')
-
+    
     return render(request, 'auth/change_password.html', {'form': form})
 
 # Create your views here.

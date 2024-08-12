@@ -1,5 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
+
+
+def news_image_upload_to(instance, filename):
+    return f'news_image/{instance.name}/{filename}'
+
+
+def min_length_validator(value):
+
+    if len(value) <= 3:
+        raise ValidationError('Name should contsins more than 3 chracters')
+    
+    return value
+    
 
 
 class News(models.Model):
@@ -8,15 +23,15 @@ class News(models.Model):
         verbose_name = 'новость'
         verbose_name_plural = 'новости'
 
-    name = models.CharField(verbose_name='название', max_length=100)
-    image = models.ImageField(verbose_name='изображение', upload_to='news_images/')
+    name = models.CharField(verbose_name='название', max_length=100, validators=[min_length_validator])
+    image = models.ImageField(verbose_name='изображение', upload_to=news_image_upload_to)
     category = models.ForeignKey(
         'news.Category', on_delete=models.PROTECT, related_name='news', verbose_name='категория')
     tags = models.ManyToManyField('news.Tag', related_name='news', verbose_name='теги')
     description = models.CharField(verbose_name='описание', max_length=300)
     content = models.TextField(verbose_name='контент')
     date = models.DateTimeField(verbose_name='дата добавление', auto_now_add=True)
-    views = models.PositiveIntegerField(verbose_name='просмотры', default=0)
+    views = models.IntegerField(verbose_name='просмотры', default=0, validators=[MinValueValidator(0), MaxValueValidator(100000)])
     author = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='news', verbose_name='автор')
     is_published = models.BooleanField(verbose_name='публичность', default=True)
 
